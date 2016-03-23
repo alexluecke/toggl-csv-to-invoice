@@ -30,28 +30,24 @@ class InvoiceGenerator {
 	}
 
 	public function get_total_hours() {
-		$total = array();
-		$total['hours'] = 0;
-		$total['minutes'] = 0;
-		$total['seconds'] = 0;
+
+		$total = 0.0;
+
 		if (file_exists($this->file)) {
-			$handle = fopen($this->file, "r");
-			if (($handle = fopen($this->file, "r")) !== FALSE) {
-				$data = fgetcsv($handle, 1000, ",");
-				while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
-					$hour_string = $data[11];
-					list($hour, $min, $sec) = explode(":", $hour_string);
-					$total['hours']   += intval($hour);
-					$total['minutes'] += intval($min);
-					$total['seconds']     += intval($sec);
+			if (($fd = fopen($this->file, "r")) !== FALSE) {
+				$data = fgetcsv($fd, 1000, ",");
+				while (($data = fgetcsv($fd, 1000, ",")) !== FALSE) {
+					$t_str = $data[11];
+					list($h, $m, $s) = explode(":", $t_str);
+					$total += (double)intval($h);
+					$total += (double)intval($m)/60.0;
+					$total += (double)intval($s)/3600.0;
 				}
-				fclose($handle);
+				fclose($fd);
 			}
 		}
-		$time = ((double)$total['hours']);
-		$time += ((double)$total['minutes'])/60.0;
-		$time += ((double)$total['seconds'])/3600.0;
-		return $time;
+
+		return $total;
 	}
 
 	public function print_row($row=array()) {
@@ -103,17 +99,16 @@ class InvoiceGenerator {
 
 	public function print_invoice() {
 		if (file_exists($this->file)) {
-			$handle = fopen($this->file, "r");
 			echo "<table id='tasks'>";
-			if (($handle = fopen($this->file, "r")) !== FALSE) {
+			if (($fd = fopen($this->file, "r")) !== FALSE) {
 
-				if ($data = fgetcsv($handle, 1000, ",") !== FALSE)
+				if ($data = fgetcsv($fd, 1000, ",") !== FALSE)
 					$this->print_row_header($data);
 
-				while (($data = fgetcsv($handle, 1000, ",")) !== FALSE)
+				while (($data = fgetcsv($fd, 1000, ",")) !== FALSE)
 					$this->print_row($data);
 
-				fclose($handle);
+				fclose($fd);
 			}
 			$this->print_row_time();
 			echo "</table>";
