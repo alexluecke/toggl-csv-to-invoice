@@ -39,9 +39,9 @@ class InvoiceGenerator {
 				while (($data = fgetcsv($fd, 1000, ",")) !== FALSE) {
 					$t_str = $data[11];
 					list($h, $m, $s) = explode(":", $t_str);
-					$total += (double)intval($h);
-					$total += (double)intval($m)/60.0;
-					$total += (double)intval($s)/3600.0;
+					$total += (double)intval($h)
+						+ (double)intval($m)/60.0
+						+ (double)intval($s)/3600.0;
 				}
 				fclose($fd);
 			}
